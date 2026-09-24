@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NETRA – Network Attack Forecasting Prototype</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap">
+<style>
+:root{--bg:#EBF0F3;--panel:#fff;--ink:#0F1E28;--mute:#5B6B76;--line:#D5DEE3;--safe:#1F8A70;--warn:#C77F14;--crit:#C8372D;--acc:#1E5AA8;--tint:#F3F6F8;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0B1620;--panel:#122230;--ink:#E6EEF2;--mute:#93A5B0;--line:#23394A;--safe:#3CBF9D;--warn:#EDB04A;--crit:#F0645A;--acc:#6AA7F0;--tint:#0F1D29}}
+:root[data-theme="dark"]{--bg:#0B1620;--panel:#122230;--ink:#E6EEF2;--mute:#93A5B0;--line:#23394A;--safe:#3CBF9D;--warn:#EDB04A;--crit:#F0645A;--acc:#6AA7F0;--tint:#0F1D29}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 Figtree,system-ui,-apple-system,Segoe UI,sans-serif;font-variant-numeric:tabular-nums}
+.wrap{max-width:1180px;margin:0 auto;padding:16px 14px 32px}
+header{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:space-between;margin-bottom:14px}
+h1{font-size:26px;letter-spacing:.14em;margin:0;font-weight:800}
+h1 small{display:block;font-size:13px;letter-spacing:0;font-weight:500;color:var(--mute);margin-top:2px}
+.chip{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:5px 12px;font-size:13px;color:var(--mute)}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;align-items:center}
+button{font:inherit;font-size:14px;font-weight:600;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:8px 12px;cursor:pointer;min-height:38px}
+button:hover{border-color:var(--acc)}button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+button.go{background:var(--crit);border-color:var(--crit);color:#fff}
+button:disabled{opacity:.45;cursor:default}
+.sp{flex:1}
+.grid{display:grid;gap:14px;grid-template-columns:1fr}
+@media(min-width:900px){.grid{grid-template-columns:1.55fr 1fr}}
+.col{display:flex;flex-direction:column;gap:14px;min-width:0}
+.p{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
+.p h2{font-size:15px;margin:0 0 10px;font-weight:700}
+.mute{color:var(--mute);font-size:13px}
+.hero{display:flex;flex-wrap:wrap;gap:16px 26px;align-items:center}
+.big{font-size:64px;line-height:1;font-weight:800;min-width:2.3em}
+.pill{display:inline-block;border-radius:999px;padding:3px 12px;font-weight:700;font-size:13px;color:#fff}
+.hz{display:flex;gap:10px;flex:1;min-width:230px}
+.hz div{flex:1;background:var(--tint);border-radius:8px;padding:8px 10px}
+.hz b{display:block;font-size:22px}
+.bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-top:5px}
+.bar i{display:block;height:100%;border-radius:3px}
+.alert{border-color:var(--crit)}
+.alert h2{color:var(--crit)}
+.ok{border-color:var(--safe)}
+.row{display:grid;grid-template-columns:118px 1fr 52px;gap:8px;align-items:center;margin:7px 0;font-size:13.5px}
+.row span:last-child{text-align:right;font-weight:600}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px}
+.kv dt{color:var(--mute)}.kv dd{margin:0;font-weight:600}
+svg{width:100%;height:auto;display:block}
+.lg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px;color:var(--mute);margin-bottom:6px}
+.lg i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:5px;vertical-align:middle}
+.tl{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.tl div{border:1px solid var(--line);border-radius:8px;padding:8px;font-size:12.5px;color:var(--mute);min-height:74px}
+.tl div.d{border-color:var(--acc);color:var(--ink);background:var(--tint)}
+.tl b{display:block;font-size:13px;margin-bottom:2px}
+@media(max-width:560px){.tl{grid-template-columns:1fr 1fr}.big{font-size:52px}.row{grid-template-columns:96px 1fr 46px}}
+.led{font-size:12.5px;margin:0;padding:0;list-style:none}
+.led li{padding:6px 0;border-top:1px solid var(--line);overflow-wrap:anywhere}
+.led code{color:var(--acc);font-size:12px}
+.p h2 svg{display:inline}
+#rep pre{white-space:pre-wrap;font:12.5px/1.55 ui-monospace,Menlo,monospace;background:var(--tint);padding:10px;border-radius:8px}
+.p:first-child{transition:border-color .3s}
+.fl{overflow-x:auto}.fl table{width:100%;border-collapse:collapse;font-size:12.5px}.fl th{text-align:left;color:var(--mute);font-weight:600;padding:4px 6px;border-bottom:1px solid var(--line)}.fl td{padding:5px 6px;border-bottom:1px solid var(--line);white-space:nowrap}
+.tag{border-radius:999px;padding:1px 9px;font-size:11.5px;font-weight:700;color:#fff}
+@media print{.ctrl,header button,.note{display:none}}
+.note{font-size:12.5px;color:var(--mute);margin-top:16px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>NETRA<small>AI network attack forecasting engine · Team CyberChronos · SIH26153</small></h1>
+  <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="chip" id="live">Replay</span><span class="chip">Metadata only</span><button onclick="theme()">Theme</button></span>
+</header>
+
+<div class="ctrl" id="ctrl"></div>
+<input type="file" id="csvIn" accept=".csv,text/csv" hidden>
+
+<div class="grid">
+  <div class="col">
+    <div class="p">
+      <div class="hero">
+        <div><div class="big" id="big">0%</div><div class="mute">highest attack risk, next 60 min</div></div>
+        <div style="flex:1;min-width:230px"><span class="pill" id="stat">Calm</span>
+          <div class="hz" id="hz" style="margin-top:10px"></div></div>
+      </div>
+    </div>
+    <div class="p" id="alert"></div>
+    <div class="p"><h2>Attack path</h2><div id="map"></div></div>
+    <div class="p"><h2>Live traffic (sampled flows)</h2><div class="fl" id="flows"></div></div>
+    <div class="p">
+      <h2>Forecast risk by horizon</h2>
+      <div class="lg"><span><i style="background:var(--crit)"></i>T+15 min</span><span><i style="background:var(--warn)"></i>T+30 min</span><span><i style="background:var(--acc)"></i>T+60 min</span><span><i style="background:var(--crit);opacity:.3"></i>labelled attack window</span></div>
+      <div id="ch1"></div>
+      <h2 style="margin-top:14px">Observed flow rate (Mbps)</h2>
+      <div id="ch2"></div>
+    </div>
+    <div class="p"><h2>Early-warning timeline</h2><div class="tl" id="tl"></div></div>
+  </div>
+
+  <div class="col">
+    <div class="p"><h2>Attack class probabilities</h2><div id="cls"></div>
+      <dl class="kv" style="margin-top:12px"><dt>Likely target</dt><dd id="tg">–</dd><dt>ATT&amp;CK stage</dt><dd id="st">–</dd></dl></div>
+    <div class="p"><h2>Flow-window signals (5-min)</h2><div id="sig"></div></div>
+    <div class="p"><h2>Why NETRA flagged this</h2><div id="why"></div></div>
+    <div class="p"><h2>Tamper-evident alert ledger</h2><ul class="led" id="led"></ul></div>
+  </div>
+</div>
+<div class="p" id="rep" style="display:none;margin-top:14px"></div>
+<p class="note">Prototype: the replay is simulated in the browser. The forecast curves stand in for the TFT/TCN + GraphSAGE model described in the NETRA deck, and the ledger uses a simple hash chain in place of Hyperledger Fabric. Each tick is one 5-minute flow window. CSV upload expects one row per window with a column named like flow_mbps (or any numeric column); the peak is treated as impact and everything else is derived from that column.</p>
+</div>
+
+<script>
+let N=72,A=50,CV=[],CM=0,CS=1;const RL=16;
+const CLASSES=['DDoS','Recon / port scan','Brute force','Botnet C2','Exfiltration','Benign'];
+const SC={
+ ddos:{n:'DDoS build-up',cls:0,tg:'Payment gateway · 10.20.4.12',st:'Impact (T1498)',pb:'Rate-limit SYN and apply edge ACL'},
+ brute:{n:'Recon → brute force',cls:2,tg:'Auth server · 10.20.1.5',st:'Credential Access (T1110)',pb:'Block source ranges and enforce lockout'},
+ c2:{n:'Botnet C2',cls:3,tg:'Database tier · 10.20.7.30',st:'Command and Control (T1071)',pb:'Sinkhole domain and isolate host VLAN'},
+ normal:{n:'Normal traffic',cls:5,tg:'None',st:'None',pb:''}
+};
+const cl=(x,a=0,b=1)=>Math.min(b,Math.max(a,x)),sig=x=>1/(1+Math.exp(-x));
+const rng=s=>()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+const H=s=>{let a=0xdeadbeef,b=0x41c6ce57;for(let i=0;i<s.length;i++){const c=s.charCodeAt(i);a=Math.imul(a^c,2654435761);b=Math.imul(b^c,1597334677)}a=Math.imul(a^a>>>16,2246822507)^Math.imul(b^b>>>13,3266489909);b=Math.imul(b^b>>>16,2246822507)^Math.imul(a^a>>>13,3266489909);return(b>>>0).toString(16).padStart(8,'0')+(a>>>0).toString(16).padStart(8,'0')};
+const clock=i=>{const m=9*60+i*5;return String(Math.floor(m/60)%24).padStart(2,'0')+':'+String(m%60).padStart(2,'0')};
+
+let key='ddos',D,t=0,mit=null,playing=true,spd=1,timer=null;
+
+function build(k){
+ const r=rng(k.length*97+13),sc=SC[k];let Z=[];
+ if(k==='custom'){N=CV.length;const zs=CV.map(v=>(v-CM)/CS),sm=zs.map((_,i)=>((zs[i-1]??zs[i])+zs[i]+(zs[i+1]??zs[i]))/3),mz=Math.max(...sm,1);Z=sm.map(v=>cl(v/mz));A=cl(CV.indexOf(Math.max(...CV)),16,N-8)}else{N=72;A=50}
+ D={e:[],p:[[],[],[]],base:[],extra:[],ent:[],syn:[],prt:[],ns:[],cls:[]};
+ for(let i=0;i<N;i++){
+  let e;
+  if(k==='custom')e=Z[i];else if(k==='normal'){e=.1+.05*Math.sin(i/4)+.04*r()+(i>=30&&i<=33?.15:0)}
+  else{const u=cl((i-(A-RL))/RL);e=u*u*(3-2*u);if(i>A+6)e=Math.max(.15,1-(i-A-6)*.15);e=cl(e+(r()-.5)*.05)}
+  D.e.push(e);
+  const g=(a,b)=>cl(a*sig(b*(e-.25))*1+(r()-.5)*.03,0,1);
+  D.p[0].push(cl(sig(10*(e-.62))*.95+(r()-.5)*.03));
+  D.p[1].push(cl(sig(9*(e-.42))*.93+(r()-.5)*.03));
+  D.p[2].push(cl(.9*sig(8*(e-.25))+(r()-.5)*.03));
+  D.base.push(k==='custom'?CV[i]:180+(r()-.5)*50);
+  D.extra.push(k==='ddos'?1100*e**3:k==='brute'?90*e:k==='c2'?140*e:0);
+  D.ent.push(2.9+e*1.5+(r()-.5)*.1);
+  D.syn.push(4+e*(k==='ddos'?36:10)+(r()-.5)*1.5);
+  D.prt.push(40+e*(k==='brute'?880:300)+(r()-.5)*30);
+  D.ns.push(3+e*(k==='ddos'?22:8)+(r()-.5)*1.2);
+  const L=[0,0,0,0,0,0].map((_,j)=>.2+r()*.3);
+  L[5]=3-4*e;L[1]=1+5*e*(1-e);
+  if(k!=='normal')L[sc.cls]=-1+6*e;
+  const m=Math.max(...L),ex=L.map(v=>Math.exp(v-m)),s=ex.reduce((a,b)=>a+b);
+  D.cls.push(ex.map(v=>v/s));
+ }
+ D.at=k==='normal'?-1:D.p[0].map((_,i)=>Math.max(D.p[0][i],D.p[1][i],D.p[2][i])).findIndex(v=>v>=.75);
+ D.fmax=Math.max(...D.base.map((b,i)=>b+D.extra[i]))*1.05;
+ D.first=D.e.findIndex(v=>v>=.2&&k!=='normal');
+}
+const flowAt=i=>D.base[i]+D.extra[i]*(mit!==null&&i>=mit?.25:1);
+const lvl=p=>p>=.75?'var(--crit)':p>=.5?'var(--warn)':'var(--safe)';
+const pm=i=>Math.max(D.p[0][i],D.p[1][i],D.p[2][i]);
+
+function chart(id,H2,ymax,series,band,thr,fmt){
+ const W=720,l=34,rr=8,tp=8,b=22,pw=W-l-rr,ph=H2-tp-b,x=i=>l+i*pw/(N-1),y=v=>tp+ph*(1-v/ymax);
+ let s=`<svg viewBox="0 0 ${W} ${H2}" role="img" aria-label="chart">`;
+ for(let g=0;g<=4;g++){const v=ymax*g/4;s+=`<line x1="${l}" x2="${W-rr}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${l-5}" y="${y(v)+4}" text-anchor="end" font-size="11" fill="var(--mute)">${fmt(v)}</text>`}
+ for(let i=0;i<N;i+=12)s+=`<text x="${x(i)}" y="${H2-6}" text-anchor="middle" font-size="11" fill="var(--mute)">${clock(i)}</text>`;
+ if(D.at>=0||key!=='normal')s+=`<rect x="${x(A)}" y="${tp}" width="${x(A+6)-x(A)}" height="${ph}" fill="var(--crit)" opacity=".13"/>`;
+ if(thr)s+=`<line x1="${l}" x2="${W-rr}" y1="${y(thr)}" y2="${y(thr)}" stroke="var(--crit)" stroke-dasharray="5 4" opacity=".7"/>`;
+ series.forEach(([arr,c])=>{s+=`<polyline fill="none" stroke="${c}" stroke-width="2.2" stroke-linejoin="round" points="${arr.slice(0,t+1).map((v,i)=>x(i).toFixed(1)+','+y(v).toFixed(1)).join(' ')}"/>`});
+ s+=`<line x1="${x(t)}" x2="${x(t)}" y1="${tp}" y2="${tp+ph}" stroke="var(--ink)" opacity=".45"/></svg>`;
+ document.getElementById(id).innerHTML=s;
+}
+
+function render(){
+ const p=[D.p[0][t],D.p[1][t],D.p[2][t]],mx=Math.max(...p);
+ const started=key!=='normal'&&t>=A,absorbed=mit!==null&&mit<A;
+ let label,col;
+ if(started&&t<=A+6){label=absorbed?'Attack absorbed':'Attack in progress';col=absorbed?'var(--safe)':'var(--crit)'}
+ else if(mx>=.75){label='Attack forecast';col='var(--crit)'}
+ else if(mx>=.5){label='Watching';col='var(--warn)'}
+ else{label='Calm';col='var(--safe)'}
+ const big=document.getElementById('big');big.textContent=Math.round(mx*100)+'%';big.style.color=lvl(mx);
+ const stEl=document.getElementById('stat');stEl.textContent=label;stEl.style.background=col;
+ document.getElementById('hz').innerHTML=[15,30,60].map((h,i)=>`<div>T+${h} min<b style="color:${lvl(p[i])}">${Math.round(p[i]*100)}%</b><div class="bar" style="padding:0;background:var(--line)"><i style="width:${p[i]*100}%;background:${lvl(p[i])}"></i></div></div>`).join('');
+
+ // alert card
+ const al=document.getElementById('alert'),sc=SC[key],has=D.at>=0&&t>=D.at;
+ if(has){
+  const lead=(A-D.at)*5,pk=Math.max(D.p[0][D.at],D.p[1][D.at],D.p[2][D.at]);
+  al.className='p alert';
+  al.innerHTML=`<h2>Early warning · ${clock(D.at)}</h2><dl class="kv"><dt>Forecast</dt><dd>${CLASSES[sc.cls]}, P = ${pk.toFixed(2)}</dd><dt>Target</dt><dd>${sc.tg}</dd><dt>Lead time</dt><dd>${lead} min before impact</dd><dt>Suggested playbook</dt><dd>${sc.pb}</dd></dl>
+  <div style="margin-top:12px">${mit===null?`<button class="go" onclick="applyPb()">Run SOAR playbook</button>`:`<span class="pill" style="background:var(--safe)">Playbook applied ${clock(mit)}</span>`}</div>`;
+ }else{
+  al.className='p ok';
+  al.innerHTML=`<h2>No active forecast alert</h2><div class="mute">${key==='normal'?'Traffic matches the learned baseline. The short burst around 11:30 is scored below the alert threshold, so no alert is raised.':'NETRA raises an alert when any horizon reaches 75%. Press play, or jump to the forecast.'}</div>`;
+ }
+
+ chart('ch1',230,1,[[D.p[0],'var(--crit)'],[D.p[1],'var(--warn)'],[D.p[2],'var(--acc)']],1,.75,v=>Math.round(v*100)+'%');
+ const fl=D.base.map((_,i)=>flowAt(i));
+ chart('ch2',130,Math.ceil(D.fmax/100)*100,[[fl,'var(--ink)']],1,0,v=>Math.round(v));
+
+ // classes
+ document.getElementById('cls').innerHTML=CLASSES.map((c,j)=>{const v=D.cls[t][j];return `<div class="row"><span>${c}</span><div class="bar" style="margin:0"><i style="width:${v*100}%;background:${j===5?'var(--safe)':'var(--acc)'}"></i></div><span>${Math.round(v*100)}%</span></div>`}).join('');
+ const show=has||mx>=.5;
+ document.getElementById('tg').textContent=show?sc.tg:'–';
+ document.getElementById('st').textContent=show?sc.st:'–';
+
+ // signals
+ const S=[['DNS entropy',D.ent,2.9,4.4,v=>v.toFixed(2)+' bits'],['SYN ratio',D.syn,4,key==='ddos'?40:14,v=>v.toFixed(1)+'%'],['Distinct dst ports',D.prt,40,key==='brute'?920:340,v=>Math.round(v)],['New-source ratio',D.ns,3,key==='ddos'?25:11,v=>v.toFixed(1)+'%']];
+ document.getElementById('sig').innerHTML=S.map(([n,a,b0,b1,f])=>{const z=cl((a[t]-b0)/(b1-b0));return `<div class="row"><span>${n}</span><div class="bar" style="margin:0"><i style="width:${z*100}%;background:${lvl(z)}"></i></div><span>${f(a[t])}</span></div>`}).join('');
+
+ // timeline
+ const T=[
+  [D.first>=0&&t>=D.first,'Early signal',D.first>=0&&t>=D.first?clock(D.first)+' · scan and DNS entropy shift':'Waiting for drift'],
+  [has,'Forecast raised',has?clock(D.at)+' · SOC alert sent':'Below threshold'],
+  [mit!==null,'Pre-emptive action',mit!==null?clock(mit)+' · playbook applied':'Not yet applied'],
+  [started||(key==='normal'&&t===N-1),'T = 0',key==='normal'?(t===N-1?'No attack occurred':'—'):started?(absorbed?clock(A)+' · absorbed, service up':clock(A)+' · service degraded'):'—']
+ ];
+ document.getElementById('tl').innerHTML=T.map(([d,a,b])=>`<div class="${d?'d':''}"><b>${a}</b>${b}</div>`).join('');
+
+ // ledger
+ let prev='0000000000000000',out=[];
+ const ev=[];if(has)ev.push(['FORECAST',D.at,CLASSES[sc.cls]+' P='+pm(D.at).toFixed(2)]);if(mit!==null&&mit<=t)ev.push(['MITIGATION',mit,sc.pb]);
+ ev.forEach(([n,i,d],k)=>{const h=H(prev+n+i+d);out.push(`<li><b>#${k+1} ${n}</b> · ${clock(i)}<br>${d}<br><code>${h.slice(0,8)}…</code> ← prev <code>${prev.slice(0,8)}</code></li>`);prev=h});
+ document.getElementById('led').innerHTML=out.length?out.reverse().join(''):'<li class="mute">No alerts recorded yet.</li>';
+ netmap(show,has);why(S,show);traffic();
+ document.getElementById('live').textContent=(playing?'● Replay ':'Paused ')+clock(t);
+ document.querySelector('.hero').parentElement.style.borderLeft='6px solid '+lvl(mx);
+}
+
+const NM={net:['Internet',50,100],edge:['Edge router',190,100],fw:['Firewall',330,100],pay:['Payment gw',560,36],auth:['Auth server',560,100],db:['Database',560,164]};
+const NE=[['net','edge'],['edge','fw'],['fw','pay'],['fw','auth'],['fw','db']];
+const PT={ddos:['net','edge','fw','pay'],custom:['net','edge','fw','pay'],brute:['net','edge','fw','auth'],c2:['db','fw','edge','net']};
+const TG={ddos:'pay',custom:'pay',brute:'auth',c2:'db'};
+function netmap(show,has){
+ const P=show?(PT[key]||[]):[],hit=(a,b)=>P.some((n,i)=>i&&((P[i-1]===a&&n===b)||(P[i-1]===b&&n===a))),c=mit!==null?'var(--safe)':'var(--crit)';
+ let s='<svg viewBox="0 0 720 200" role="img" aria-label="network map">';
+ NE.forEach(([a,b])=>{const p=NM[a],q=NM[b],on=hit(a,b);s+=`<line x1="${p[1]}" y1="${p[2]}" x2="${q[1]}" y2="${q[2]}" stroke="${on?c:'var(--line)'}" stroke-width="${on?4:2}" ${on&&mit!==null?'stroke-dasharray="6 5"':''}/>`});
+ for(const k in NM){const [n,x,y]=NM[k],tg=show&&TG[key]===k,on=P.includes(k);s+=`<rect x="${x-46}" y="${y-16}" width="92" height="32" rx="8" fill="var(--panel)" stroke="${tg?'var(--crit)':on?c:'var(--line)'}" stroke-width="${tg?3:2}"/><text x="${x}" y="${y+4}" text-anchor="middle" font-size="12" font-weight="600" fill="var(--ink)">${n}</text>`}
+ if(mit!==null&&show)s+=`<text x="190" y="72" text-anchor="middle" font-size="12" font-weight="700" fill="var(--safe)">Playbook active</text>`;
+ document.getElementById('map').innerHTML=s+'</svg><div class="mute">'+(P.length?(key==='c2'?'Outbound beaconing: ':'Predicted path: ')+P.map(k=>NM[k][0]).join(' → '):'No suspicious path while risk is below 50%.')+'</div>';
+}
+function why(S,show){
+ const z=S.map(([n,a,b0,b1,f])=>[n,cl((a[t]-b0)/(b1-b0)),f(a[t]),f(b0)]),sum=z.reduce((s,q)=>s+q[1],0)||1;
+ document.getElementById('why').innerHTML=show?z.sort((a,b)=>b[1]-a[1]).map(q=>`<div class="row"><span>${q[0]}</span><div class="bar" style="margin:0"><i style="width:${q[1]/sum*100}%;background:var(--acc)"></i></div><span>${Math.round(q[1]/sum*100)}%</span></div><div class="mute" style="margin:-3px 0 6px">now ${q[2]} · baseline ${q[3]}</div>`).join('')+'<div class="mute">Share of the forecast driven by each signal. This stands in for SHAP-style attribution.</div>':'<div class="mute">Nothing to explain yet. Risk is below 50%.</div>';
+}
+function loadCSV(tx){
+ const L=tx.trim().split(/\r?\n/).map(s=>s.split(',')),h=L[0].map(s=>s.trim().toLowerCase());
+ let c=h.findIndex(s=>/mbps|flow|byte|rate|pps|packet/.test(s));if(c<0)c=h.findIndex((_,j)=>L[1]&&!isNaN(+L[1][j]));
+ const v=L.slice(1,301).map(r=>+r[c]).filter(x=>isFinite(x));
+ if(c<0||v.length<24){alert('Need a numeric column with at least 24 rows.');return}
+ const m=v.slice(0,Math.max(8,v.length>>2)).sort((a,b)=>a-b),med=m[m.length>>1],mad=m.map(x=>Math.abs(x-med)).sort((a,b)=>a-b)[m.length>>1];
+ CV=v;CM=med;CS=(mad*1.48)||Math.max(1e-9,med*.1)||1;
+ SC.custom={n:'Your CSV',cls:0,tg:'Monitored host from your data',st:'Impact (T1498)',pb:'Rate-limit and apply edge ACL'};
+ pick('custom');
+}
+function rep(){
+ const sc=SC[key],has=D.at>=0&&t>=D.at;
+ const tx=['# NETRA forecast report','','Scenario: '+sc.n,'Window: '+clock(t),'Highest risk (next 60 min): '+Math.round(pm(t)*100)+'%',
+ has?`Forecast: ${CLASSES[sc.cls]} on ${sc.tg} (${sc.st}), raised ${clock(D.at)}, ${(A-D.at)*5} min before impact`:'Forecast: no alert raised'
